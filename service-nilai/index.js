@@ -45,11 +45,13 @@ app.get('/nilai', (req, res) => {
     return res.json(rows);
   }
 
-  if (role === 'dosen') {
+    if (role === 'dosen') {
+    const kelasId = req.query.kelas_id || null;
     const rows = db.prepare(`
       SELECT n.id, n.kelas_id, k.nama AS kelas, n.nim, n.nilai_angka, n.status
       FROM nilai n JOIN kelas k ON k.id = n.kelas_id
-      WHERE k.dosen_id = ?`).all(sub);
+      WHERE k.dosen_id = ? AND (? IS NULL OR n.kelas_id = ?)`)
+      .all(sub, kelasId, kelasId);
     return res.json(rows);
   }
 

@@ -36,7 +36,7 @@ function enforce(req, res, next) {
   // 2. Minta keputusan ke Policy Engine (gagal = tolak / fail closed)
   let keputusan;
   try {
-    keputusan = putuskan({ method: req.method, path, claims, device });
+    keputusan = putuskan({ method: req.method, path, claims, device, query: req.query });
   } catch (e) {
     console.error(e);
     keputusan = { allow: false, status: 500, subjek: 'anonim', alasan: 'kesalahan internal policy engine (fail closed)' };

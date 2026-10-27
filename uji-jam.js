@@ -15,6 +15,6 @@ const BASE = 'http://localhost:3000';
   const b = await fetch(`${BASE}/kelas/1/finalisasi`, { method: 'POST', headers: h });
   console.log('Finalisasi :', b.status, await b.text());
 
-  const c = await fetch(`${BASE}/nilai`, { headers: h });
+  const c = await fetch(`${BASE}/nilai?kelas_id=1`, { headers: h });
   console.log('Lihat nilai:', c.status, '(melihat nilai tidak dibatasi jam)');
 })();

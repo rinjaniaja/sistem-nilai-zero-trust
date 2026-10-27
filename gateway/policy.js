@@ -9,7 +9,7 @@ function dalamJamAkses(sekarang = new Date()) {
 }
 
 // Mengembalikan { allow, status, subjek, alasan }
-function putuskan({ method, path, claims, device }) {
+function putuskan({ method, path, claims, device, query = {} }) {
   const rute = `${method} ${path}`;
   const izinkan = (subjek, alasan) => ({ allow: true, status: 200, subjek, alasan });
   const tolak = (subjek, status, alasan) => ({ allow: false, status, subjek, alasan });
@@ -43,10 +43,21 @@ function putuskan({ method, path, claims, device }) {
     return tolak(s, 403, 'hanya token service yang boleh sinkron transkrip');
   }
 
-  // GET /nilai
+  // GET /nilai (kepemilikan diputuskan dari database)
   if (rute === 'GET /nilai') {
-    if (user.role === 'mahasiswa' || user.role === 'dosen') {
-      return izinkan(s, `${user.role} boleh melihat nilai (data difilter sesuai kepemilikan)`);
+    if (user.role === 'mahasiswa') {
+      const nimDiminta = query.nim || user.nim;
+      if (nimDiminta !== user.nim) {
+        return tolak(s, 403, 'mahasiswa hanya boleh melihat nilai NIM sendiri');
+      }
+      return izinkan(s, `mahasiswa melihat nilai miliknya (NIM ${user.nim})`);
+    }
+    if (user.role === 'dosen') {
+      if (!query.kelas_id) return tolak(s, 400, 'dosen wajib menyebut kelas_id');
+      const k = db.prepare('SELECT dosen_id FROM kelas WHERE id = ?').get(query.kelas_id);
+      if (!k) return tolak(s, 404, 'kelas tidak ditemukan');
+      if (k.dosen_id !== user.id) return tolak(s, 403, 'bukan dosen pengampu kelas ini');
+      return izinkan(s, 'dosen pengampu kelas, boleh melihat nilai');
     }
     return tolak(s, 403, `role ${user.role} tidak boleh melihat nilai`);
   }

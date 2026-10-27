@@ -45,7 +45,10 @@ async function uji(label, harapan, method, path, token, device, body) {
   await uji('mhs1 pakai device milik mhs2', 403, 'GET', '/nilai', t.mhs1, DEV.mhs2);
 
   console.log('--- Role dan kepemilikan ---');
-  await uji('dosen1 lihat nilai kelasnya', 200, 'GET', '/nilai', t.dosen1, DEV.dosen1);
+  await uji('dosen1 lihat nilai kelasnya', 200, 'GET', '/nilai?kelas_id=1', t.dosen1, DEV.dosen1);
+  await uji('dosen1 lihat nilai tanpa kelas_id', 400, 'GET', '/nilai', t.dosen1, DEV.dosen1);
+  await uji('dosen1 lihat nilai kelas dosen2', 403, 'GET', '/nilai?kelas_id=2', t.dosen1, DEV.dosen1);
+  await uji('mhs1 lihat nilai NIM mhs2', 403, 'GET', `/nilai?nim=${NIM.mhs2}`, t.mhs1, DEV.mhs1);
   await uji('admin lihat nilai', 403, 'GET', '/nilai', t.admin1, DEV.admin1);
   await uji('mhs1 lihat transkrip sendiri', 200, 'GET', `/transkrip/${NIM.mhs1}`, t.mhs1, DEV.mhs1);
   await uji('mhs1 lihat transkrip mhs2', 403, 'GET', `/transkrip/${NIM.mhs2}`, t.mhs1, DEV.mhs1);

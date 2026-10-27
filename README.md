@@ -5,6 +5,7 @@ Tugas Praktikum Individu, Keamanan Informasi (KP70065004), Informatika Universit
 - **Nama:** Bunga Denis Rinjani
 - **NPM:** 247006111064
 - **Kelas:** CD
+- **Video demo:** (isi link setelah video diunggah)
 
 ## Arsitektur
 
@@ -36,6 +37,10 @@ Panggilan antar-service (Service Nilai ke Service Transkrip saat finalisasi) jug
 | `shared/schema.sql`, `seed.js`, `db.js` | Skema, data awal, koneksi database |
 | `shared/lihat-audit.js` | Menampilkan audit log |
 | `uji-policy.js`, `uji-finalisasi.js`, `uji-jam.js` | Skrip pengujian otomatis |
+
+## Database
+
+SQLite (better-sqlite3). File dibuat otomatis di `shared/sistem-nilai.db` oleh `node shared/seed.js`. Tidak perlu menginstal server database.
 
 ## Cara Menjalankan
 
@@ -78,12 +83,36 @@ Credential service: `client_id=service-nilai`, secret ada di `.env`.
 
 Jam akses ubah/finalisasi nilai diatur di `.env` (`JAM_MULAI`, `JAM_SELESAI`). Restart gateway setelah mengubahnya.
 
+## Catatan Kebijakan GET /nilai
+
+Policy Engine memutuskan kepemilikan dengan membaca database. Mahasiswa hanya dapat melihat nilai NIM sendiri (parameter `?nim=` opsional). Dosen wajib menyertakan `?kelas_id=` dan hanya diizinkan jika ia pengampu kelas tersebut.
+
+## Contoh Pemanggilan (curl)
+
+Login (header `X-Device-ID` wajib):
+
+```
+curl -X POST http://localhost:3000/auth/login -H "Content-Type: application/json" -H "X-Device-ID: DEV-MHS-001" -d "{\"username\":\"mhs1\",\"password\":\"password123\"}"
+```
+
+Lihat nilai dengan access token hasil login:
+
+```
+curl http://localhost:3000/nilai -H "Authorization: Bearer <access_token>" -H "X-Device-ID: DEV-MHS-001"
+```
+
+Dosen melihat nilai kelasnya:
+
+```
+curl "http://localhost:3000/nilai?kelas_id=1" -H "Authorization: Bearer <access_token_dosen1>" -H "X-Device-ID: DEV-DOSEN-001"
+```
+
 ## Pengujian
 
 Reset data sebelum setiap pengujian: matikan server, `node shared/seed.js`, nyalakan lagi.
 
 ```
-node uji-policy.js           # 23 skenario allow/deny
+node uji-policy.js           # 25 skenario allow/deny
 node uji-finalisasi.js       # alur finalisasi dan sinkron transkrip
 node uji-jam.js              # penolakan di luar jam akses (set JAM_MULAI=1, JAM_SELESAI=2)
 node shared/lihat-audit.js   # melihat audit log
@@ -97,6 +126,6 @@ node shared/lihat-audit.js   # melihat audit log
 | 4.1 Token service 5 menit | `gateway/auth.js` (`/auth/service`) |
 | 4.1 Gateway secret | `gateway/index.js` (proxyReq), `shared/verify.js` |
 | 4.1 Verifikasi ulang JWT di service | `shared/verify.js` (`requireToken`) |
-| 4.2 Kebijakan akses (Tabel 3) | `gateway/policy.js` |
+| 4.2 Kebijakan akses (Tabel 3), kepemilikan dibaca dari database | `gateway/policy.js` |
 | 4.3 Device terdaftar, jam akses | `gateway/policy.js` |
 | 4.4 Audit log | `gateway/audit.js`, tabel `audit_log` |
