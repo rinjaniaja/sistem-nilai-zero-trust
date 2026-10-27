@@ -5,7 +5,7 @@ Tugas Praktikum Individu, Keamanan Informasi (KP70065004), Informatika Universit
 - **Nama:** Bunga Denis Rinjani
 - **NPM:** 247006111064
 - **Kelas:** CD
-- **Video demo:** (isi link setelah video diunggah)
+- **Video demo:** [Tonton di Google Drive](https://drive.google.com/file/d/1F59mYJMpHL2CcF8bKZGPChISfMTqMUUw/view?usp=drive_link)
 
 ## Arsitektur
 
